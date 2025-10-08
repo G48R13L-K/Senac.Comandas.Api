@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Comandas.Api.Models;
+using Comandas.Api.DTOs;
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace Comandas.Api.Controllers
@@ -45,13 +46,13 @@ namespace Comandas.Api.Controllers
 
         // POST api/<MesaController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        public void Post([FromBody] MesaCreateRequest mesaCreate)
         {
         }
 
         // PUT api/<MesaController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public void Put(int id, [FromBody] MesaUpdateRequests mesaUpdate)
         {
         }
 
