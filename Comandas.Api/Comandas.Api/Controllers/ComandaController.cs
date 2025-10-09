@@ -62,8 +62,10 @@ namespace Comandas.Api.Controllers
             {
                 Id = Comandas.Count + 1,
                 NomeCliente = comandaCreate.NomeCliente,
-                NumeroMesa = comandaCreate.NumeroMesa,
+                NumeroMesa = comandaCreate.NumeroMesa
             };
+            Comandas.Add(novaComanda);
+            return Results.Created($"api/comanda/{novaComanda.Id}", novaComanda);
         }
 
         // PUT api/<ComandaController>/5

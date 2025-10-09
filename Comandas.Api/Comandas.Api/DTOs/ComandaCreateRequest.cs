@@ -8,6 +8,6 @@ namespace Comandas.Api.DTOs
 
         public string NomeCliente { get; set; } = default!;
 
-        public [] CardapioItemIds { get; set; };
+        public int[] CardapioItemIds { get; set; } = default;
     }
 }
