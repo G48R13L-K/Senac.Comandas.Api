@@ -8,6 +8,6 @@ namespace Comandas.Api.DTOs
 
         public string NomeCliente { get; set; } = default!;
 
-        public List<ComandaItem> Itens { get; set; } = new List<ComandaItem>();
+        
     }
 }
