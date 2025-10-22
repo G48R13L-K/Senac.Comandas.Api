@@ -80,8 +80,16 @@ namespace Comandas.Api.Controllers
 
         // DELETE api/<MesaController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public IResult Delete(int id)
         {
+            var mesa = mesas.FirstOrDefault(c => c.Id == id);
+            if (mesa is null)
+                return Results.NotFound("Mesa não encontrada");
+            var mesaRemovida = mesas.Remove(mesa);
+            if (mesaRemovida)
+                return Results.NoContent();
+            return Results.StatusCode(500);
         }
     }
-}
+    }
+

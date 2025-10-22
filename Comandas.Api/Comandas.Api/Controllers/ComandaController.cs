@@ -128,8 +128,15 @@ namespace Comandas.Api.Controllers
 
         // DELETE api/<ComandaController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public IResult Delete(int id)
         {
+            var comanda = Comandas.FirstOrDefault(c => c.Id == id);
+            if (comanda is null)
+                return Results.NotFound("Comanda não encontrada");
+            var comandaRemovida = Comandas.Remove(comanda);
+            if(comandaRemovida)
+                return Results.NoContent();
+            return Results.StatusCode(500);
         }
     }
 }
