@@ -9,31 +9,24 @@ namespace Comandas.Api.Controllers
     [ApiController]
     public class MesaController : ControllerBase
     {
-        public List<Mesa> mesas = new List<Mesa> {
-            new Mesa
-            {       Id = 1,
-                    NumeroMesa = 1,
-                    SituacaoMesa = (int)SituacaoMesa.Livre,
-            }, 
-            new Mesa
-            {       
-                Id = 2,
-                NumeroMesa = 2,
-                SituacaoMesa = (int)SituacaoMesa.Ocupada,
-                }
-        };
-// GET: api/<MesaController>
-[HttpGet]
+        public ComandaDbContext _context { get; set; }
+        public MesaController(ComandaDbContext context)
+        {
+            _context = context;
+        }
+        // GET: api/<MesaController>
+        [HttpGet]
         public IResult GetMesa()
         {
-            return Results.Ok(mesas);
+            var mesa = _context.Mesas.ToList();
+            return Results.Ok(mesa);
         }
 
         // GET api/<MesaController>/5
         [HttpGet("{id}")]
         public IResult Get(int id)
         {
-            var mesa = mesas.FirstOrDefault(m => m.Id == id);
+            var mesa = _context.Mesas.FirstOrDefault(m => m.Id == id);
             if (mesa == null)
             {
                 return Results.NotFound("Mesa não encontrada");
@@ -53,11 +46,11 @@ namespace Comandas.Api.Controllers
 
             var novaMesa = new Mesa
             {
-                Id = mesas.Count + 1,
                 NumeroMesa = mesaCreate.NumeroMesa,
                 SituacaoMesa = (int)SituacaoMesa.Livre
             };
-            mesas.Add(novaMesa);
+            _context.Mesas.Add(novaMesa);
+            _context.SaveChanges();
             return Results.Created($"/api/mesa/{novaMesa.Id}", novaMesa);
         }
 
@@ -70,7 +63,7 @@ namespace Comandas.Api.Controllers
             if(mesaUpdate.SituacaoMesa < 0 || mesaUpdate.SituacaoMesa > 2)
                 return Results.BadRequest("A situação da mesa deve ser 0 (Livre)," + "1 (Ocupada) ou 2 (Reservada).");
 
-            var mesa =mesas.FirstOrDefault(u => u.Id == id);
+            var mesa =_context.Mesas.FirstOrDefault(u => u.Id == id);
             if (mesa is null)
                 return Results.NotFound($"Mesa {id} não encontrada!");
             mesa.NumeroMesa = mesaUpdate.NumeroMesa;
@@ -82,11 +75,12 @@ namespace Comandas.Api.Controllers
         [HttpDelete("{id}")]
         public IResult Delete(int id)
         {
-            var mesa = mesas.FirstOrDefault(c => c.Id == id);
+            var mesa = _context.Mesas.FirstOrDefault(c => c.Id == id);
             if (mesa is null)
                 return Results.NotFound("Mesa não encontrada");
-            var mesaRemovida = mesas.Remove(mesa);
-            if (mesaRemovida)
+             _context.Mesas.Remove(mesa);
+            var mesaRemovida = _context.SaveChanges();
+            if (mesaRemovida >0)
                 return Results.NoContent();
             return Results.StatusCode(500);
         }

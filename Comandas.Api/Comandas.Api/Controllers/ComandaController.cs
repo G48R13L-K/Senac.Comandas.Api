@@ -1,6 +1,7 @@
 ﻿using Comandas.Api.DTOs;
 using Comandas.Api.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Identity.Client;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -10,44 +11,22 @@ namespace Comandas.Api.Controllers
     [ApiController]
     public class ComandaController : ControllerBase
     {
-        static List<Comanda> Comandas = new List<Comanda>()
-        {
-            new Comanda
-            {
-                Id = 1,
-                NomeCliente = "Gabriel",
-                NumeroMesa = 1,
-                Itens = new List<ComandaItem>
-                {
-                    new ComandaItem
-                    {
-                        Id= 1,
-                        CardapioItemId = 1,
-                        ComandaItemId = 1,
-                    }
-                }
+        static List<Comanda> Comandas = new List<Comanda>();
+        
+            public ComandaDbContext _context { get; set; }
 
-            },
-            new Comanda
-            {
-                Id = 2,
-                NomeCliente = "Juninho",
-                NumeroMesa = 2,
-                 Itens = new List<ComandaItem>
-                {
-                    new ComandaItem
-                    {
-                        Id= 2,
-                        CardapioItemId = 2,
-                        ComandaItemId = 2,
-                    }
-                }
-            }
-        };
-        // GET: api/<ComandaController>
-        [HttpGet]
+        public ComandaController(ComandaDbContext context)
+        {
+            _context = context;
+        }
+        
+
+
+// GET: api/<ComandaController>
+[HttpGet]
         public IResult Get()
         {
+            var comandos = _context.Comandas.ToList();
             return Results.Ok(Comandas);
         }
 
@@ -55,7 +34,7 @@ namespace Comandas.Api.Controllers
         [HttpGet("{id}")]
         public IResult Get(int id)
         {
-            var Comanda = Comandas.FirstOrDefault(x => x.Id == id);
+            var Comanda = _context.Comandas.FirstOrDefault(x => x.Id == id);
             if (Comanda == null)
             {
                 return Results.NotFound("Comanda não encontrada.");
@@ -78,7 +57,7 @@ namespace Comandas.Api.Controllers
                 return Results.BadRequest("A comanda deve ter pelo menos um item do cardápio");
             var novaComanda = new Comanda
             {
-                Id = Comandas.Count + 1,
+                
                 NomeCliente = comandaCreate.NomeCliente,
                 NumeroMesa = comandaCreate.NumeroMesa,
                 
@@ -98,7 +77,8 @@ namespace Comandas.Api.Controllers
             }
             //adiciona a nova comanda a lista de comandas
             novaComanda.Itens = comandaItens;
-
+            _context.Comandas.Add(novaComanda);
+            _context.SaveChanges();
             Comandas.Add(novaComanda);
 
 
@@ -117,12 +97,13 @@ namespace Comandas.Api.Controllers
 
 
 
-            var comanda =  Comandas.FirstOrDefault(u => u.Id == id);
+            var comanda =  _context.Comandas.FirstOrDefault(u => u.Id == id);
             if (comanda is null)
                 return Results.NotFound($"Comanda{id} não encontrada!");
             comanda.NumeroMesa = comandaUpdate.NumeroMesa;
             comanda.NomeCliente = comandaUpdate.NomeCliente;
-            
+            _context.Comandas.Add(comanda);
+            _context.SaveChanges();
             return Results.NoContent();
         }
 
@@ -133,8 +114,9 @@ namespace Comandas.Api.Controllers
             var comanda = Comandas.FirstOrDefault(c => c.Id == id);
             if (comanda is null)
                 return Results.NotFound("Comanda não encontrada");
-            var comandaRemovida = Comandas.Remove(comanda);
-            if(comandaRemovida)
+            _context.Comandas.Remove(comanda);
+            var comandaRemovida = _context.SaveChanges() ;
+            if (comandaRemovida>0)
                 return Results.NoContent();
             return Results.StatusCode(500);
         }

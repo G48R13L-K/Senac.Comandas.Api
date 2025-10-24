@@ -2,6 +2,7 @@
 using Comandas.Api.DTOs;
 using Comandas.Api.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -10,36 +11,29 @@ namespace Comandas.Api.Controllers
     [Route("api/[controller]")]
     [ApiController]
     public class UsuarioController : ControllerBase
-    {
-        static List<Usuario> usuarios = new List<Usuario>() {
-        new Usuario
-            {
-                Id = 1,
-                Nome = "adm",
-                Email = "adm@adm.com",
-                Senha = "123"
-
-            },
-        new Usuario
+    {   //variavel que representa o banco de dados
+        public ComandaDbContext _context { get; set; }
+        //construtor que recebe o contexto do banco de dados
+        public UsuarioController(ComandaDbContext context)
         {
-            Id = 2,
-            Nome = "usuario",
-            Email = "usuario@usuario.com",
-            Senha = "usuario"
+            _context = context;
         }
-        };
+
+    
         // GET: api/<UsuarioController>
         [HttpGet]
-        public IResult Get()
+    public IResult Get()
         {
-            return Results.Ok(usuarios);
+        var usuarios = _context.Usuarios.ToList();
+        return Results.Ok(usuarios);
         }
 
         // GET api/<UsuarioController>/5
         [HttpGet("{id}")]
         public IResult Get(int id)
-        {
-            var usuario = usuarios.FirstOrDefault(x => x.Id == id);
+        {   //busca usuario pelo id
+            
+            var usuario = _context.Usuarios.FirstOrDefault(x => x.Id == id);
             if (usuario == null)
             {
                 return Results.NotFound("Usuário não encontrado");
@@ -63,20 +57,25 @@ namespace Comandas.Api.Controllers
 
            var usuario = new Usuario
            {
-               Id = usuarios.Count + 1,
                Nome = usuarioCreate.Nome,
                Email = usuarioCreate.Email,
                Senha= usuarioCreate.Senha,
            };
-            usuarios.Add(usuario);
+            //adiciona usuario ao banco de dados
+            _context.Usuarios.Add(usuario);
+            //salva as alterações no banco de dados
+            _context.SaveChanges();
+            //retorna o usuario criado com o status 201
             return Results.Created($"/api/usuario/{usuario.Id}",usuario);
+
         }
 
         // PUT api/<UsuarioController>/5
         [HttpPut("{id}")]
         public IResult Put(int id, [FromBody] UsuarioUpdateRequest usuarioUpdate)
         {
-            var usuario = usuarios.FirstOrDefault(u => u.Id == id);
+            //busca usuario pelo id
+            var usuario = _context.Usuarios.FirstOrDefault(u => u.Id == id);
             //retorna mensagem se não encontrar 
             if (usuario is null) 
                 return Results.NotFound($"Usuario do id {id} não encontrado.");
@@ -85,6 +84,8 @@ namespace Comandas.Api.Controllers
             usuario.Nome = usuarioUpdate.Nome;
             usuario.Email = usuarioUpdate.Email;
             usuario.Senha = usuarioUpdate.Senha;
+            //salva as alterações no banco de dados
+            _context.SaveChanges();
             return Results.NoContent();
                 
         }
@@ -92,12 +93,14 @@ namespace Comandas.Api.Controllers
         // DELETE api/<UsuarioController>/5
         [HttpDelete("{id}")]
         public IResult Delete(int id)
-        {
-            var usuario = usuarios.FirstOrDefault(c => c.Id == id);
+        {   //busca usuario pelo id
+            var usuario = _context.Usuarios.FirstOrDefault(c => c.Id == id);
             if (usuario is null)
                 return Results.NotFound("Usuário não encontrada");
-            var usuarioRemovido = usuarios.Remove(usuario);
-            if (usuarioRemovido)
+
+            _context.Usuarios.Remove(usuario);
+            var usuarioRemovido = _context.SaveChanges();
+            if (usuarioRemovido > 0)
                 return Results.NoContent();
             return Results.StatusCode(500);
         }
