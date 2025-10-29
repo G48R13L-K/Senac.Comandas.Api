@@ -6,7 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 //Configurar o contexto do banco de dados para usar o InMemoryDatabase
 builder.Services.AddDbContext<ComandaDbContext>(options =>
-options.UseInMemoryDatabase("ComandasDb")
+options.UseSqlite("Data Source=comandas.db")
 );
 
 builder.Services.AddControllers();

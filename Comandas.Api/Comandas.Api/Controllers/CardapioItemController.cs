@@ -97,10 +97,11 @@ namespace Comandas.Api.Controllers
             var itemRemovido = _context.SaveChanges();
             if (itemRemovido > 0)
             {
-                return Results.StatusCode(500);
+                return Results.NoContent();
+                
             }
 
-            return Results.NoContent();
+            return Results.StatusCode(500);
         }
 
     }

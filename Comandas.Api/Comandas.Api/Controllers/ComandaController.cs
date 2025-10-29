@@ -66,23 +66,26 @@ namespace Comandas.Api.Controllers
             };
             //cria variavel do tipo lista de items
             var comandaItens = new List<ComandaItem>();
-            
-            foreach(int cardapioItemId in comandaCreate.CardapioItemIds)
-            {//atribui os itens a nota comanda
-                comandaItens.Add(new ComandaItem 
-                { 
-                    CardapioItemId = cardapioItemId,
-                });
 
+            foreach (int cardapioItemId in comandaCreate.CardapioItemIds)
+            {//atribui os itens a nota comanda
+                var comandaItem = new ComandaItem
+                {
+                    CardapioItemId = cardapioItemId,
+                    Comanda = novaComanda,
+                }; 
+                comandaItens.Add(comandaItem);
+                var cardapioItem = _context.cardapioItems.FirstOrDefault(c => c.Id == cardapioItemId);
             }
             //adiciona a nova comanda a lista de comandas
             novaComanda.Itens = comandaItens;
             _context.Comandas.Add(novaComanda);
             _context.SaveChanges();
-            Comandas.Add(novaComanda);
 
-
+            
             return Results.Created($"api/comanda/{novaComanda.Id}", novaComanda);
+            
+           
         }
 
         // PUT api/<ComandaController>/5

@@ -103,8 +103,23 @@ namespace Comandas.Api.Controllers
 
         // DELETE api/<PedidoCozinhaController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public IResult Delete(int id)
         {
+            var pedidoCozinha = _context.pedidoCozinhas.FirstOrDefault(x => x.Id == id);
+            if (pedidoCozinha == null)
+            {
+                return Results.NotFound("Pedido não encontrado.");
+            }
+           var pedidoRemovido = _context.SaveChanges();
+            _context.pedidoCozinhas.Remove(pedidoCozinha);
+            if (pedidoRemovido > 0)
+            {
+                return Results.NoContent();
+            }
+            return Results.StatusCode(500);
+            
+
+            
         }
     }
 }
