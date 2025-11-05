@@ -76,6 +76,21 @@ namespace Comandas.Api.Controllers
                 }; 
                 comandaItens.Add(comandaItem);
                 var cardapioItem = _context.cardapioItems.FirstOrDefault(c => c.Id == cardapioItemId);
+                if (cardapioItem!.PossuiPreparo)
+                {
+                    var pedido = new PedidoCozinha
+                    {
+                        Comanda = novaComanda
+                    };
+                    var pedidoItem = new PedidoCozinhaItem
+                    {
+                        ComandaItem = comandaItem,
+                        PedidoCozinha = pedido
+
+                    };
+                    _context.pedidoCozinhas.Add(pedido);
+                    _context.pedidoCozinhaItems.Add(pedidoItem);
+                }
             }
             //adiciona a nova comanda a lista de comandas
             novaComanda.Itens = comandaItens;
