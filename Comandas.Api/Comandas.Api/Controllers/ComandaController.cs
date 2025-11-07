@@ -26,8 +26,8 @@ namespace Comandas.Api.Controllers
 [HttpGet]
         public IResult Get()
         {
-            var comandos = _context.Comandas.ToList();
-            return Results.Ok(Comandas);
+            var comandas = _context.Comandas.ToList();
+            return Results.Ok(comandas);
         }
 
         // GET api/<ComandaController>/5
@@ -97,11 +97,22 @@ namespace Comandas.Api.Controllers
             _context.Comandas.Add(novaComanda);
             _context.SaveChanges();
 
+            var resposta = new ComandaCreateResponse
+            {
+                Id = novaComanda.Id,
+                NomeCliente = novaComanda.NomeCliente,
+                NumeroMesa = novaComanda.NumeroMesa,
+                Itens = novaComanda.Itens.Select(i => new ComandaItemResponse
+                {
+                    id = i.Id,
+                    Titulo = _context.cardapioItems.First(ci => ci.Id == i.CardapioItemId).Titulo
+                }).ToList()
+            };
+            return Results.Created($"/api/comanda/{resposta.Id}", resposta); 
+            }
+                
             
-            return Results.Created($"api/comanda/{novaComanda.Id}", novaComanda);
-            
-           
-        }
+          
 
         // PUT api/<ComandaController>/5
         [HttpPut("{id}")]

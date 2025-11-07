@@ -33,6 +33,12 @@ namespace Comandas.Api
                         Id = 2,
                         NumeroMesa = 2,
                         SituacaoMesa = 0
+                    },
+                    new Models.Mesa
+                    {
+                        Id = 3,
+                        NumeroMesa = 3,
+                        SituacaoMesa = 0
                     }
                     );
             base.OnModelCreating(modelBuilder);
