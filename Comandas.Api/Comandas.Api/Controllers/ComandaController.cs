@@ -118,22 +118,54 @@ namespace Comandas.Api.Controllers
         [HttpPut("{id}")]
         public IResult Put(int id, [FromBody] ComandaUpdateRequest comandaUpdate)
         {
+            var comanda = _context.Comandas.FirstOrDefault(u => u.Id == id);
             if (comandaUpdate.NomeCliente.Length < 3)
                 return Results.BadRequest("O nome do cliente dete ter no minimo 3 caracteres.");
             if (comandaUpdate.NumeroMesa <= 0)
                 return Results.BadRequest("O número da mesa deve ser maior que zero.");
-           
-
-
-
-            var comanda =  _context.Comandas.FirstOrDefault(u => u.Id == id);
             if (comanda is null)
                 return Results.NotFound($"Comanda{id} não encontrada!");
             comanda.NumeroMesa = comandaUpdate.NumeroMesa;
             comanda.NomeCliente = comandaUpdate.NomeCliente;
-            _context.Comandas.Add(comanda);
+
+            foreach(var item in comandaUpdate.Itens){
+                //verifica se id for informado e remove for verdadeiro, remove o item
+                if (item.Id > 0 && item.Remove == true)
+                {
+                    //remove
+                    removerItemComanda(item.Id);
+                }
+                //verifica se esta inserindo um item
+                if(item.cardapíoItemId > 0)
+                {
+                    //inserir
+                    inserirItemComanda(comanda, item.cardapíoItemId);
+                }
+            }
+
+            
             _context.SaveChanges();
             return Results.NoContent();
+        }
+
+        private void inserirItemComanda(Comanda comanda, int cardapíoItemId)
+        {
+            _context.ComandaItens.Add(
+                new ComandaItem
+                {
+                     CardapioItemId = cardapíoItemId,
+                     Comanda = comanda
+                
+                });
+        }
+
+        private void removerItemComanda(int id)
+        {
+            var comandaItem = _context.ComandaItens.FirstOrDefault(c1 => c1.Id == id);
+            if(comandaItem is not null)
+            {
+                _context.ComandaItens.Remove(comandaItem);
+            }
         }
 
         // DELETE api/<ComandaController>/5
