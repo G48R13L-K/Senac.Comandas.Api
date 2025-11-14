@@ -51,8 +51,24 @@ namespace Comandas.Api.Controllers
             {
                 return BadRequest();
             }
-
+            //atualização
             _context.Entry(reserva).State = EntityState.Modified;
+
+            
+            //mudar a situação para reservar 
+            var novaMesa = await _context.Mesas.FirstOrDefaultAsync(m => m.NumeroMesa == reserva.NumeroMesa);
+            if (novaMesa is null)
+                return BadRequest("Mesa não encontrada.");
+            novaMesa.SituacaoMesa = (int)SituacaoMesa.Reservada;
+
+            //consulta dados da reserva original
+            var reservaOriginal = await _context.Reservas.AsNoTracking().FirstOrDefaultAsync(r => r.id == id);
+            //consulta dados da mesa original
+            var numeroMesaOriginal = reservaOriginal.NumeroMesa;
+            //consulta mesa original
+            var mesaOriginal = await _context.Mesas.
+                FirstOrDefaultAsync(m => m.NumeroMesa == numeroMesaOriginal);
+            mesaOriginal!.SituacaoMesa = (int)SituacaoMesa.Livre;
 
             try
             {
@@ -78,7 +94,29 @@ namespace Comandas.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<Reserva>> PostReserva(Reserva reserva)
         {
+            
             _context.Reservas.Add(reserva);
+            //atualizar status da mesa
+
+            //consultando a mesa prlo numero
+            var mesa = await _context.Mesas.FirstOrDefaultAsync(m => m.NumeroMesa == reserva.NumeroMesa);
+            //se não houver mesa, retornar erro
+            if (mesa == null)
+                {
+                    return BadRequest("Mesa não encontrada.");
+                }
+            //se houver a mesa, verificar se está livre
+            if (mesa is not null)
+                {
+                    //se a mesa não estiver livre, retorna erro
+                    if(mesa.SituacaoMesa != (int)SituacaoMesa.Livre)
+                    {
+                        return BadRequest("Mesa não está disponível para reserva.");
+                    }
+                    //atualizando status da mesa para reservada
+                     mesa.SituacaoMesa = (int)SituacaoMesa.Reservada;
+                }
+
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetReserva", new { id = reserva.id }, reserva);
@@ -88,10 +126,22 @@ namespace Comandas.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReserva(int id)
         {
+            //consulta a reserva
             var reserva = await _context.Reservas.FindAsync(id);
             if (reserva == null)
             {
-                return NotFound();
+                return NotFound("Reserva não encontrada.");
+            }
+
+            //consulta a mesa
+            var mesa = await _context.Mesas.FirstOrDefaultAsync(m => m.NumeroMesa == reserva.NumeroMesa);
+            {
+                if(mesa == null)
+                {
+                    return BadRequest("Mesa não encontrada.");
+                }
+                //atualizando status da mesa para livre
+                mesa.SituacaoMesa = (int)SituacaoMesa.Livre;
             }
 
             _context.Reservas.Remove(reserva);
