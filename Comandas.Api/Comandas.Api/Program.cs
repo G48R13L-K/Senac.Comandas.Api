@@ -20,7 +20,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("MinhaPolitica", policy =>
     {
-        policy.WithOrigins("http://localhost", "http://127.0.0.1:5500", "http://127.0.0.1") // Origens permitidas
+        policy.WithOrigins("http://localhost:5501", "http://localhost:5502", "http://127.0.0.1:5502", "http://127.0.0.1:5500", "http://127.0.0.1") // Origens permitidas
         .AllowAnyHeader() // Permite qualquer cabeçalho
         .AllowAnyMethod(); // Permite qualquer método HTTP
     });
