@@ -60,7 +60,11 @@ namespace Comandas.Api
                         PossuiPreparo = true
                     }
                     );
-
+            modelBuilder.Entity<Models.CategoriaCardapio>().HasData(
+                new Models.CategoriaCardapio { Id = 1, Nome = "Lanche" },
+                new Models.CategoriaCardapio { Id = 2, Nome = "Bebidas" },
+                new Models.CategoriaCardapio { Id = 3, Nome = "Acompanhamentos" });
+            base.OnModelCreating(modelBuilder);
         }
         public DbSet<Models.Usuario> Usuarios { get; set; } = default!;
         public DbSet<Models.Mesa> Mesas { get; set; } = default!;
@@ -71,5 +75,6 @@ namespace Comandas.Api
         public DbSet<Models.PedidoCozinhaItem> pedidoCozinhaItems { get; set; } = default!;
         public DbSet<Models.CardapioItem> cardapioItems { get; set; } = default!;
        
-    }
+        public DbSet<Models.CategoriaCardapio> CategoriaCardapio { get; set; } = default!;
+    }   
 }
