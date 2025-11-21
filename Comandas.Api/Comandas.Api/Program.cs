@@ -33,6 +33,8 @@ var app = builder.Build();
 
 // Configura o middleware CORS
 
+app.Urls.Add("http://localhost:5211");
+app.Urls.Add("https://localhost:5211");
 
 app.UseCors("MinhaPolitica");
 
