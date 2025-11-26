@@ -1,6 +1,7 @@
 ﻿using Comandas.Api.DTOs;
 using Comandas.Api.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Client;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -26,7 +27,7 @@ namespace Comandas.Api.Controllers
 [HttpGet]
         public IResult GetCardapios()
         {
-            var cardapios = _context.cardapioItems.ToList();
+            var cardapios = _context.cardapioItems.Include(c => c.CategoriaCardapio).ToList();
             return Results.Ok(cardapios);
         }
 
@@ -36,7 +37,9 @@ namespace Comandas.Api.Controllers
         {
 
             //Buscar na lista de cardapios de acordo com o id
-            var cardapio = _context.cardapioItems.FirstOrDefault(c => c.Id == id);
+            var cardapio = _context.cardapioItems
+                .Include(ci => ci.CategoriaCardapioId)
+                .FirstOrDefault(c => c.Id == id);
             if (cardapio == null)
             {
                 return Results.NotFound("Cardápio não encontrado");
@@ -57,6 +60,15 @@ namespace Comandas.Api.Controllers
                 return Results.BadRequest("A descrição do item deve possuir mais de 3 caracteres.");
             if (cardapio.Preco <= 0)
                 return Results.BadRequest("O preço deve ser maior que zero.");
+            //validaçãp de categoria
+            if (cardapio.CategoriaCardapioId.HasValue)
+            {
+                var categoria = _context.CategoriaCardapio.FirstOrDefault
+                    (c => c.Id == cardapio.CategoriaCardapioId);
+                if (categoria is null) {
+                    return Results.BadRequest("Categoria de cardápio inválida.");
+                }
+            }
             var cardapioItem = new CardapioItem
             {
                 Titulo = cardapio.Titulo,
@@ -78,11 +90,22 @@ namespace Comandas.Api.Controllers
             var CardapioItem = _context.cardapioItems.FirstOrDefault(u => u.Id == id);
             if (CardapioItem is null)
                 return Results.NotFound($"Cardapio {id} não foi encontrado.");
+            //se categoria for informada
+            if (cardapio.CategoriaCardapioId.HasValue)
+            {
+                var categoria = _context.CategoriaCardapio.FirstOrDefault
+                    (c => c.Id == cardapio.CategoriaCardapioId);
+                if (categoria is null)
+                {
+                    return Results.BadRequest("Categoria de cardápio inválida.");
+                }
+            }
 
             CardapioItem.Titulo =cardapio.Titulo;
             CardapioItem.Descricao = cardapio.Descricao;
             CardapioItem.Preco = cardapio.Preco;
             CardapioItem.PossuiPreparo = cardapio.PossuiPreparo;
+            CardapioItem.CategoriaCardapioId = cardapio.CategoriaCardapioId;
             _context.SaveChanges();
             return Results.NoContent();
         }
