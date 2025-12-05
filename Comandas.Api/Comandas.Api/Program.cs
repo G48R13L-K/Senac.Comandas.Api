@@ -31,6 +31,16 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+//criar o banco de dados
+//criar um escopo usado para obter instancias
+using (var scope = app.Services.CreateScope())
+{
+    //obter um objeto do banco de dados
+    var db = scope.ServiceProvider.GetRequiredService<ComandaDbContext>();
+    //executar a migração
+    await db.Database.MigrateAsync();
+}
+
 // Configura o middleware CORS
 
 app.Urls.Add("https://localhost:7004");
