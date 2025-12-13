@@ -23,8 +23,24 @@ namespace Comandas.Api.Controllers
         [HttpGet]
         public IResult Get()
         {
-            var PedidoCozinha = _context.pedidoCozinhas.ToList();
-            return Results.Ok(PedidoCozinha);
+            var pedidos = _context.pedidoCozinhas.Select(
+     pedidos => new PedidoCozinhaResponse
+     {
+         id = pedidos.Id,
+         ComandaId = pedidos.ComandaId,
+         NumeroMesa = _context.Comandas
+                         .First(c => c.Id == pedidos.ComandaId).NumeroMesa,
+         items = pedidos.Itens
+         .Select(pi => new PedidoCozinhaItemCreateResponse
+         {
+             Titulo = _context.cardapioItems
+                         .First(c => c.Id ==
+                             _context.ComandaItens
+                             .First(ci => ci.Id == pi.ComandaItemId).CardapioItemId
+                          ).Titulo
+         }).ToList()
+     }).OrderBy(p => p.NumeroMesa).ToList();
+            return Results.Ok(pedidos);
         }
 
         // GET api/<PedidoCozinhaController>/5
