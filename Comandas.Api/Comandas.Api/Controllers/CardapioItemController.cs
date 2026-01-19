@@ -75,6 +75,7 @@ namespace Comandas.Api.Controllers
                 Descricao = cardapio.Descricao,
                 Preco = cardapio.Preco,
                 PossuiPreparo = cardapio.PossuiPreparo,
+                Imagem = cardapio.Imagem,
                 CategoriaCardapioId = cardapio.CategoriaCardapioId
             };
 
@@ -105,6 +106,7 @@ namespace Comandas.Api.Controllers
             CardapioItem.Descricao = cardapio.Descricao;
             CardapioItem.Preco = cardapio.Preco;
             CardapioItem.PossuiPreparo = cardapio.PossuiPreparo;
+            CardapioItem.Imagem = cardapio.Imagem;
             CardapioItem.CategoriaCardapioId = cardapio.CategoriaCardapioId;
             _context.SaveChanges();
             return Results.NoContent();
